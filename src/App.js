@@ -15,7 +15,7 @@ function App() {
         <Route
           exact
           path="/"
-          element={isAuthenticated ? <Navigate to="/board" /> : <LoginPage />}
+          element={isAuthenticated ? <Navigate to="/board" /> : <RegisterPage />}
         />
         <Route path="/" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />

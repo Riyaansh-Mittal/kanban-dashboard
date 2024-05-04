@@ -1,21 +1,14 @@
-import React, { useLayoutEffect, useState } from "react";
 import styled from "styled-components";
-import { HiMiniMagnifyingGlass } from "react-icons/hi2";
-import { TbArrowsSort } from "react-icons/tb";
-import { FiPlusCircle } from "react-icons/fi";
 import Column from "../components/Column";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  addColumn,
-  unselectTask,
-  updateTaskLocation,
-  updateTaskSeverity,
-  updateTaskStatus,
-  updateTaskTarget,
+  updateTaskLocation
 } from "../redux/slices/columnsSlice";
 import { DragDropContext } from "react-beautiful-dnd";
 import { logout } from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
+import Switch from "../components/Switch";
+import Controls from "../components/Controls";
 
 const Root = styled.div`
   display: flex;
@@ -61,21 +54,13 @@ const Board = styled.main`
   }
 `;
 
-const Controls = styled.section`
+const ControlsContainer = styled.section`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 `;
 
-const ControlsContainer = styled.div`
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  @media (max-width: 768px) {
-    justify-content: center;
-  }
-`;
 
 const Button = styled.button`
   border: 1.5px dashed #ccc;
@@ -100,84 +85,14 @@ const Button = styled.button`
   }
 `;
 
-const SortButton = styled(Button)`
-  border: 1.5px solid #ccc;
-`;
 const SignOutButton = styled(Button)`
   border: 1.5px solid black;
 `;
 
-const SearchInput = styled.div`
-  display: flex;
-  align-items: center;
-  background-color: #fff;
-  border: 1.5px solid #ccc;
-  border-radius: 8px;
-  height: 35px;
-  box-shadow: inset 0 -2px 0px rgba(178, 183, 188, 0.2);
-  width: 205px;
-  @media (max-width: 768px) {
-    margin-bottom: 10px;
-    width: 100%;
-  }
-`;
-
-const Input = styled.input`
-  border: none;
-  outline: none;
-  width: 100%;
-  height: 80%;
-`;
-
-const MagnifyingGlassIcon = styled.span`
-  color: #6c7177;
-  margin-left: 10px;
-  margin-right: 5px;
-`;
-
-const SwitchLabel = styled.label`
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-`;
-
-const SwitchCheckbox = styled.input`
-  margin-left: 10px;
-`;
-
-const LabelWrapper = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const Dropdown = styled.select`
-  padding: 5px;
-  border-radius: 5px;
-`;
-
-const severityOptions = [
-  { value: "", label: "Select Severity" },
-  { value: "Critical", label: "Critical" },
-  { value: "High", label: "High" },
-  { value: "Medium", label: "Medium" },
-  { value: "Low", label: "Low" },
-  { value: "", label: "Remove Severity" },
-];
-const targetOptions = [
-  { value: "", label: "Select Target" },
-  { value: "Hypejab", label: "Hypejab" },
-  { value: "Getastra", label: "Getastra" },
-  { value: "Source Code", label: "Source Code" },
-  { value: "", label: "Remove Target" },
-];
 
 function KanbanBoard() {
   const columns = useSelector((state) => state.columns.columns);
   const dispatch = useDispatch();
-
-  const handleAddColumn = () => {
-    dispatch(addColumn({ title: "" }));
-  };
 
   const handleDragEnd = (result) => {
     const { source, destination, draggableId } = result;
@@ -201,70 +116,6 @@ function KanbanBoard() {
     );
   };
 
-  const selectedTask = useSelector((state) => state.columns.selectedTask);
-
-  const [selectedSeverity, setSelectedSeverity] = useState("");
-  const [selectedTarget, setSelectedTarget] = useState("");
-  const [isSeverityDropdownOpen, setIsSeverityDropdownOpen] = useState(false);
-  const [isTargetDropdownOpen, setIsTargetDropdownOpen] = useState(false);
-  const [isStatusInputOpen, setIsStatusInputOpen] = useState(false);
-  const [statusValue, setStatusValue] = useState("");
-
-  const handleSeverityButtonClick = () => {
-    setIsSeverityDropdownOpen(!isSeverityDropdownOpen);
-  };
-  const handleTargetButtonClick = () => {
-    setIsTargetDropdownOpen(!isTargetDropdownOpen);
-  };
-  const handleStatusButtonClick = () => {
-    setIsStatusInputOpen(!isStatusInputOpen);
-  };
-  const handleStatusChange = (event) => {
-    setStatusValue(event.target.value);
-  };
-
-  const handleLabelChange = (event, label) => {
-    const newValue = event.target.value;
-    if (label === "severity") {
-      dispatch(
-        updateTaskSeverity({
-          columnId: selectedTask.columnId,
-          taskNumber: selectedTask.taskNumber,
-          severity: newValue,
-        })
-      );
-      setSelectedSeverity("");
-      setIsSeverityDropdownOpen(!isSeverityDropdownOpen);
-    } else if (label === "target") {
-      dispatch(
-        updateTaskTarget({
-          columnId: selectedTask.columnId,
-          taskNumber: selectedTask.taskNumber,
-          target: newValue,
-        })
-      );
-      setSelectedTarget("");
-      setIsTargetDropdownOpen(!isTargetDropdownOpen);
-    }
-    dispatch(unselectTask());
-  };
-  const handleStatusSubmit = () => {
-    if (
-      statusValue.trim() !== "" &&
-      Number(statusValue.trim()) >= 0 &&
-      Number(statusValue.trim()) <= 10
-    ) {
-      dispatch(
-        updateTaskStatus({
-          columnId: selectedTask.columnId,
-          taskNumber: selectedTask.taskNumber,
-          status: statusValue.trim(),
-        })
-      );
-      setIsStatusInputOpen(false);
-      setStatusValue("");
-    }
-  };
 
   const navigate = useNavigate();
 
@@ -278,8 +129,8 @@ function KanbanBoard() {
         <h1>Vulnerabilities</h1>
         <SignOutButton onClick={handleSignOut}>Sign Out</SignOutButton>
       </Header>
-      <Controls>
-        <ControlsContainer>
+      <ControlsContainer>
+        {/* <ControlsContainer>
           <SearchInput>
             <MagnifyingGlassIcon>
               <HiMiniMagnifyingGlass size={15} />
@@ -356,12 +207,10 @@ function KanbanBoard() {
               </Dropdown>
             )}
           </LabelWrapper>
-        </ControlsContainer>
-        <SwitchLabel>
-          Switch to List
-          <SwitchCheckbox type="checkbox" />
-        </SwitchLabel>
-      </Controls>
+        </ControlsContainer> */}
+        <Controls />
+        <Switch />
+      </ControlsContainer>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Board>
           {columns.map((column, index) => (
