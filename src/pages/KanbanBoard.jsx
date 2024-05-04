@@ -100,7 +100,7 @@ function KanbanBoard() {
       const sourceColumnId = source.droppableId;
       const destinationColumnId = destination ? destination.droppableId : null;
       const sourceIndex = source.index;
-      const destinationIndex = destination ? columns.find(column => column.id === destination.droppableId).tasks.length : 0;
+      const destinationIndex = destination ? columns.find(column => `column-${column.id}` === destination.droppableId).tasks.length : 0;
       dispatch(
         updateTaskLocation({
           taskId: draggableId,
