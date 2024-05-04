@@ -95,7 +95,21 @@ function KanbanBoard() {
 
   const handleDragEnd = (result) => {
     const { source, destination, draggableId } = result;
-    if (!destination) {
+
+    if (!destination || destination.index == null) {
+      const sourceColumnId = source.droppableId;
+      const destinationColumnId = destination ? destination.droppableId : null;
+      const sourceIndex = source.index;
+      const destinationIndex = destination ? columns.find(column => column.id === destination.droppableId).tasks.length : 0;
+      dispatch(
+        updateTaskLocation({
+          taskId: draggableId,
+          sourceColumnId,
+          destinationColumnId,
+          sourceIndex,
+          destinationIndex,
+        })
+      );
       return;
     }
     if (
