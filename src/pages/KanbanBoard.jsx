@@ -14,6 +14,8 @@ import {
   updateTaskTarget,
 } from "../redux/slices/columnsSlice";
 import { DragDropContext } from "react-beautiful-dnd";
+import { logout } from "../redux/slices/authSlice";
+import { useNavigate } from "react-router-dom";
 
 const Root = styled.div`
   display: flex;
@@ -28,6 +30,10 @@ const Header = styled.header`
   font-size: x-large;
   font-weight: bold;
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 const Board = styled.main`
@@ -96,6 +102,9 @@ const Button = styled.button`
 
 const SortButton = styled(Button)`
   border: 1.5px solid #ccc;
+`;
+const SignOutButton = styled(Button)`
+  border: 1.5px solid black;
 `;
 
 const SearchInput = styled.div`
@@ -257,10 +266,17 @@ function KanbanBoard() {
     }
   };
 
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
   return (
     <Root>
       <Header>
         <h1>Vulnerabilities</h1>
+        <SignOutButton onClick={handleSignOut}>Sign Out</SignOutButton>
       </Header>
       <Controls>
         <ControlsContainer>
