@@ -113,6 +113,13 @@ export const columnsSlice = createSlice({
       removed.id = `${destColumnNumber}` + `${destinationIndex}`;
       destColumn.tasks.splice(destinationIndex, 0, removed);
     },
+    updateColumnTasks: (state, action) => {
+      const { columnId, tasks } = action.payload;
+      const columnIndex = state.columns.findIndex((column) => column.id === columnId);
+      if (columnIndex !== -1) {
+        state.columns[columnIndex].tasks = tasks;
+      }
+    },
   },
 });
 
@@ -129,6 +136,7 @@ export const {
   updateColumnTitle,
   updateTaskTopic,
   updateTaskLocation,
+  updateColumnTasks
 } = columnsSlice.actions;
 
 export default columnsSlice.reducer;

@@ -10,6 +10,7 @@ import {
   updateTaskSeverity,
   updateTaskStatus,
   updateTaskTarget,
+  updateColumnTasks
 } from "../redux/slices/columnsSlice";
 
 const ControlsContainer = styled.div`
@@ -176,6 +177,22 @@ function Controls() {
     }
   };
 
+  const columns = useSelector((state) => state.columns.columns);
+
+  const sortTasksByDate = () => {
+    const sortedColumns = columns.map((column) => {
+      const sortedTasks = [...column.tasks].sort((a, b) => {
+        return new Date(a.creationTime) - new Date(b.creationTime);
+      });
+      return { ...column, tasks: sortedTasks };
+    });
+    console.log(sortedColumns);
+    sortedColumns.forEach((column) => {
+      dispatch(updateColumnTasks({ columnId: column.id, tasks: column.tasks }));
+    });
+  };
+  
+
   return (
     <ControlsContainer>
                 <SearchInput>
@@ -188,7 +205,7 @@ function Controls() {
               style={{ marginBottom: "2px", borderRadius: "10px", color: "" }}
             />
           </SearchInput>
-          <SortButton>
+          <SortButton onClick={sortTasksByDate}>
             <TbArrowsSort style={{ transform: "scaleX(-1)" }} />
             Sort by
           </SortButton>
@@ -220,7 +237,7 @@ function Controls() {
               Status
             </Button>
             {selectedTask && isStatusInputOpen && (
-              <div>
+              <div style={{display: 'flex', alignItems: 'center'}}>
                 <Input
                   type="text"
                   placeholder="Enter status..."
