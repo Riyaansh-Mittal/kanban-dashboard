@@ -17,6 +17,65 @@ This is a Kanban board web application built using React and Redux. It allows us
 - React Beautiful DND (Drag and Drop)
 - Styled Components
 
+## Usage
+
+### Adding a Task
+
+To add a new task:
+1. Click the "+" button in the desired column.
+
+### Editing Task Topic
+
+To edit an existing task:
+1. Click on the task topic to edit task topic.
+2. click outside the input field to save the changes.
+3. 
+### Adding Labels
+
+To edit an existing task:
+1. Click on the task.
+2. click on Severity Button to select the severity you want or edit.
+3. Same way is used to edit Severity
+4. above 3 steps are also followed to add target and status
+
+### Deleting a Task
+
+To delete a task:
+1. Click on the three dots to get the option to delete tasks.
+
+### Adding a Category
+
+1. Click on the 'Assigned to' button to add a category.
+2. Clock on the 'Click to add title' add a title or edit it.
+   
+### Adding a Category
+
+1. Click on the three dots to get the option to delete tasks.
+
+### Drag and Drop
+
+To move a task between columns:
+1. Click and hold on the task you want to move.
+2. Drag the task to the desired column.
+3. Release the mouse button to drop the task into a column which already has a task.
+
+### Filtering Tasks
+
+To filter tasks by search query:
+1. Type your search query into the search bar at the top of the page.
+2. The tasks will automatically filter as you type, displaying only those that match the search query.
+
+### Sorting Tasks by Date and Time
+
+To sort tasks by severity, target, or status:
+1. Click the "Sort by" button in the controls panel.
+3. The tasks will rearrange themselves according to the Date and Time
+4. 
+### Verify Task
+
+1. Click on the verify icon at bottom right of task to verify it.
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
