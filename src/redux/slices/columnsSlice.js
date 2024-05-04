@@ -8,12 +8,49 @@ const initialState = {
     { id: 'column-4', title: "Solved", tasks: [] },
     { id: 'column-5', title: "Need Attention", tasks: [] },
   ],
+  selectedTask: null,
 };
 
 export const columnsSlice = createSlice({
   name: "columns",
   initialState,
   reducers: {
+    selectTask: (state, action) => {
+      state.selectedTask = action.payload;
+    },
+    unselectTask: (state) => {
+      state.selectedTask = null;
+    },
+    updateTaskSeverity: (state, action) => {
+      const { columnId, taskNumber, severity } = action.payload;
+      const columnToUpdate = state.columns.find((column) => column.id === columnId);
+      if (columnToUpdate) {
+        const taskToUpdate = columnToUpdate.tasks.find((task) => task.taskNumber === taskNumber);
+        if (taskToUpdate) {
+          taskToUpdate.severity = severity;
+        }
+      }
+    },
+    updateTaskTarget: (state, action) => {
+      const { columnId, taskNumber, target } = action.payload;
+      const columnToUpdate = state.columns.find((column) => column.id === columnId);
+      if (columnToUpdate) {
+        const taskToUpdate = columnToUpdate.tasks.find((task) => task.taskNumber === taskNumber);
+        if (taskToUpdate) {
+          taskToUpdate.target = target;
+        }
+      }
+    },
+    updateTaskStatus: (state, action) => {
+      const { columnId, taskNumber, status } = action.payload;
+      const columnToUpdate = state.columns.find((column) => column.id === columnId);
+      if (columnToUpdate) {
+        const taskToUpdate = columnToUpdate.tasks.find((task) => task.taskNumber === taskNumber);
+        if (taskToUpdate) {
+          taskToUpdate.status = status;
+        }
+      }
+    },
     addTask: (state, action) => {
       const { columnId, task } = action.payload;
       const column = state.columns.find((c) => c.id === columnId);
@@ -32,7 +69,7 @@ export const columnsSlice = createSlice({
     },
     addColumn: (state, action) => {
       const newColumn = {
-        id: `column-${state.columns.length + 1}`, // Generate a unique ID
+        id: `column-${state.columns.length + 1}`,
         title: action.payload.title,
         tasks: [],
       };
@@ -80,6 +117,11 @@ export const columnsSlice = createSlice({
 });
 
 export const {
+  selectTask,
+  unselectTask,
+  updateTaskSeverity,
+  updateTaskTarget,
+  updateTaskStatus,
   addTask,
   deleteTask,
   addColumn,

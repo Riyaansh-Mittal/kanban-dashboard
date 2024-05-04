@@ -6,9 +6,9 @@ const Svg = styled.svg`
 `;
 
 const Spinner = ({ percentage }) => {
-  const radius = 20; // Radius of the circle
-  const circumference = 2 * Math.PI * radius; // Circumference of the circle
-  const offset = ((100 - percentage) / 100) * circumference; // Calculate the offset based on percentage
+  const radius = 20; 
+  const circumference = 2 * Math.PI * radius;
+  const offset = ((100 - percentage) / 100) * circumference;
 
   return (
     <Svg width="50" height="50">
@@ -29,7 +29,7 @@ const Spinner = ({ percentage }) => {
         stroke="red"
         strokeDasharray={circumference}
         strokeDashoffset={offset}
-        strokeLinecap="round" // Round the stroke caps for a nicer appearance
+        strokeLinecap="round"
       />
     </Svg>
   );

@@ -5,16 +5,23 @@ import { TbArrowsSort } from "react-icons/tb";
 import { FiPlusCircle } from "react-icons/fi";
 import Column from "../components/Column";
 import { useDispatch, useSelector } from "react-redux";
-import { addColumn, updateTaskLocation } from "../redux/slices/columnsSlice";
+import {
+  addColumn,
+  unselectTask,
+  updateTaskLocation,
+  updateTaskSeverity,
+  updateTaskStatus,
+  updateTaskTarget,
+} from "../redux/slices/columnsSlice";
 import { DragDropContext } from "react-beautiful-dnd";
 
 const Root = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100vh; // Full viewport height
+  height: 100vh;
   padding: 20px 20px 0px 20px;
-  box-sizing: border-box; // Padding included in the height calculation
-  overflow: hidden; // Prevent any overflow from Root itself
+  box-sizing: border-box;
+  overflow: hidden;
 `;
 
 const Header = styled.header`
@@ -24,29 +31,25 @@ const Header = styled.header`
 `;
 
 const Board = styled.main`
-  flex: 1; // Fill the available space
+  flex: 1;
   display: flex;
   flex-wrap: nowrap;
   overflow-x: auto;
   overflow-y: auto;
   gap: 25px;
-  padding: 0 20px; // Ensure padding is only horizontal
-  margin: 0 -20px; // Adjust this if necessary
-  align-self: stretch; // Ensure it stretches to fit horizontally
-
+  padding: 0 20px;
+  margin: 0 -20px;
+  align-self: stretch;
   &::-webkit-scrollbar {
     height: 8px;
     width: 8px;
   }
-
   &::-webkit-scrollbar-track {
     background: #f1f1f1;
   }
-
   &::-webkit-scrollbar-thumb {
     background: #888;
   }
-
   &::-webkit-scrollbar-thumb:hover {
     background: #555;
   }
@@ -62,10 +65,9 @@ const Controls = styled.section`
 const ControlsContainer = styled.div`
   display: flex;
   gap: 10px;
-  flex-wrap: wrap; // Allows controls to wrap onto the next line on smaller screens
-
+  flex-wrap: wrap;
   @media (max-width: 768px) {
-    justify-content: center; // Center-aligns controls on smaller screens
+    justify-content: center;
   }
 `;
 
@@ -76,6 +78,7 @@ const Button = styled.button`
   border-radius: 8px;
   padding: 10px 10px;
   height: 35px;
+  max-width: 140px;
   cursor: pointer;
   font-weight: 600;
   display: flex;
@@ -84,16 +87,15 @@ const Button = styled.button`
   box-shadow: inset 0 -2px 0px rgba(178, 183, 188, 0.2);
   gap: 10px;
   font-size: 15px;
-
   @media (max-width: 768px) {
-    font-size: 13px; // Smaller font size on smaller screens
-    padding: 8px 8px; // Smaller padding
-    flex-grow: 1; // Allows buttons to expand and fill the space
+    font-size: 13px;
+    padding: 8px 8px;
+    flex-grow: 1;
   }
 `;
 
 const SortButton = styled(Button)`
-  border: 1.5px solid #ccc; // Uses the same responsive settings as Button but with solid border
+  border: 1.5px solid #ccc;
 `;
 
 const SearchInput = styled.div`
@@ -105,9 +107,8 @@ const SearchInput = styled.div`
   height: 35px;
   box-shadow: inset 0 -2px 0px rgba(178, 183, 188, 0.2);
   width: 205px;
-
   @media (max-width: 768px) {
-    margin-bottom: 10px; // Adds space below on smaller screens
+    margin-bottom: 10px;
     width: 100%;
   }
 `;
@@ -135,6 +136,32 @@ const SwitchCheckbox = styled.input`
   margin-left: 10px;
 `;
 
+const LabelWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const Dropdown = styled.select`
+  padding: 5px;
+  border-radius: 5px;
+`;
+
+const severityOptions = [
+  { value: "", label: "Select Severity" },
+  { value: "Critical", label: "Critical" },
+  { value: "High", label: "High" },
+  { value: "Medium", label: "Medium" },
+  { value: "Low", label: "Low" },
+  { value: "", label: "Remove Severity" },
+];
+const targetOptions = [
+  { value: "", label: "Select Target" },
+  { value: "Hypejab", label: "Hypejab" },
+  { value: "Getastra", label: "Getastra" },
+  { value: "Source Code", label: "Source Code" },
+  { value: "", label: "Remove Target" },
+];
+
 function KanbanBoard() {
   const columns = useSelector((state) => state.columns.columns);
   const dispatch = useDispatch();
@@ -145,30 +172,90 @@ function KanbanBoard() {
 
   const handleDragEnd = (result) => {
     const { source, destination, draggableId } = result;
- 
-    // If there's no destination, do nothing
     if (!destination) {
-       return;
+      return;
     }
-    // If the task is dropped in the same position, do nothing
     if (
-       source.droppableId === destination.droppableId &&
-       source.index === destination.index
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
     ) {
-       return;
+      return;
     }
- 
-    // Dispatch an action to update the task location in the store
     dispatch(
-       updateTaskLocation({
-          taskId: draggableId,
-          sourceColumnId: source.droppableId,
-          destinationColumnId: destination.droppableId,
-          sourceIndex: source.index,
-          destinationIndex: destination.index,
-       })
+      updateTaskLocation({
+        taskId: draggableId,
+        sourceColumnId: source.droppableId,
+        destinationColumnId: destination.droppableId,
+        sourceIndex: source.index,
+        destinationIndex: destination.index,
+      })
     );
- };
+  };
+
+  const selectedTask = useSelector((state) => state.columns.selectedTask);
+
+  const [selectedSeverity, setSelectedSeverity] = useState("");
+  const [selectedTarget, setSelectedTarget] = useState("");
+  const [isSeverityDropdownOpen, setIsSeverityDropdownOpen] = useState(false);
+  const [isTargetDropdownOpen, setIsTargetDropdownOpen] = useState(false);
+  const [isStatusInputOpen, setIsStatusInputOpen] = useState(false);
+  const [statusValue, setStatusValue] = useState("");
+
+  const handleSeverityButtonClick = () => {
+    setIsSeverityDropdownOpen(!isSeverityDropdownOpen);
+  };
+  const handleTargetButtonClick = () => {
+    setIsTargetDropdownOpen(!isTargetDropdownOpen);
+  };
+  const handleStatusButtonClick = () => {
+    setIsStatusInputOpen(!isStatusInputOpen);
+  };
+  const handleStatusChange = (event) => {
+    setStatusValue(event.target.value);
+  };
+
+  const handleLabelChange = (event, label) => {
+    const newValue = event.target.value;
+    if (label === "severity") {
+      dispatch(
+        updateTaskSeverity({
+          columnId: selectedTask.columnId,
+          taskNumber: selectedTask.taskNumber,
+          severity: newValue,
+        })
+      );
+      setSelectedSeverity("");
+      setIsSeverityDropdownOpen(!isSeverityDropdownOpen);
+    } else if (label === "target") {
+      dispatch(
+        updateTaskTarget({
+          columnId: selectedTask.columnId,
+          taskNumber: selectedTask.taskNumber,
+          target: newValue,
+        })
+      );
+      setSelectedTarget("");
+      setIsTargetDropdownOpen(!isTargetDropdownOpen);
+    }
+    dispatch(unselectTask());
+  };
+  const handleStatusSubmit = () => {
+    if (
+      statusValue.trim() !== "" &&
+      Number(statusValue.trim()) >= 0 &&
+      Number(statusValue.trim()) <= 10
+    ) {
+      dispatch(
+        updateTaskStatus({
+          columnId: selectedTask.columnId,
+          taskNumber: selectedTask.taskNumber,
+          status: statusValue.trim(),
+        })
+      );
+      setIsStatusInputOpen(false);
+      setStatusValue("");
+    }
+  };
 
   return (
     <Root>
@@ -195,25 +282,64 @@ function KanbanBoard() {
             <FiPlusCircle />
             Assigned To
           </Button>
+          <LabelWrapper>
+            <Button onClick={handleSeverityButtonClick}>
+              <FiPlusCircle />
+              Severity
+            </Button>
+            {selectedTask && isSeverityDropdownOpen && (
+              <Dropdown
+                value={selectedSeverity}
+                onChange={(e) => handleLabelChange(e, "severity")}
+              >
+                {severityOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Dropdown>
+            )}
+          </LabelWrapper>
+          <LabelWrapper>
+            <Button onClick={handleStatusButtonClick}>
+              <FiPlusCircle />
+              Status
+            </Button>
+            {selectedTask && isStatusInputOpen && (
+              <div>
+                <Input
+                  type="text"
+                  placeholder="Enter status..."
+                  value={statusValue}
+                  onChange={handleStatusChange}
+                />
+                <Button onClick={handleStatusSubmit}>Save</Button>
+              </div>
+            )}
+          </LabelWrapper>
+
           <Button>
-            <FiPlusCircle />
-            Severity
-          </Button>
-          <Button>
-            {" "}
-            <FiPlusCircle />
-            Status
-          </Button>
-          <Button>
-            {" "}
             <FiPlusCircle />
             Pentest
           </Button>
-          <Button>
-            {" "}
-            <FiPlusCircle />
-            Target
-          </Button>
+          <LabelWrapper>
+            <Button onClick={handleTargetButtonClick}>
+              <FiPlusCircle />
+              Target
+            </Button>
+            {selectedTask && isTargetDropdownOpen && (
+              <Dropdown
+                value={selectedTarget}
+                onChange={(e) => handleLabelChange(e, "target")}
+              >
+                {targetOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </Dropdown>
+            )}
+          </LabelWrapper>
         </ControlsContainer>
         <SwitchLabel>
           Switch to List
@@ -224,7 +350,7 @@ function KanbanBoard() {
         <Board>
           {columns.map((column, index) => (
             <Column key={column.id} {...column} index={index} />
-          ))}{" "}
+          ))}
         </Board>
       </DragDropContext>
     </Root>

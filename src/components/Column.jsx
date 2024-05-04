@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   addTask,
@@ -51,27 +51,27 @@ const DropdownMenu = styled.div`
 `;
 
 const Root = styled.section`
-  flex: 1; // Allow flexible growth and shrink
-  min-width: 280px; // Minimum width of a column
-  max-width: 280px; // Minimum width of a column
+  flex: 1;
+  min-width: 280px;
+  max-width: 280px;
   border-radius: 8px;
   margin: 0 0px;
 
   @media (max-width: 768px) {
-    flex-basis: 100%; // Each column takes full width on small screens
-    margin: 10px 0; // Adjust margin for vertical stacking
+    flex-basis: 100%;
+    margin: 10px 0;
   }
 `;
 
 const TopicInput = styled.textarea`
   width: 100%;
   border: none;
-  resize: none; // Prevents resizing the textarea
+  resize: none;
   background: none;
   outline: none;
   font-size: 20px;
-  overflow: hidden; // Ensures the textarea does not overflow its container
-  max-height: 20px; // Minimum height to accommodate single-line input
+  overflow: hidden;
+  max-height: 20px;
   font-weight: 600;
 `;
 
@@ -80,7 +80,6 @@ const Column = ({ id, title, tasks }) => {
   const [droppableId, setDroppableId] = useState("");
 
   useEffect(() => {
-    // Generate a unique droppable ID when the component mounts
     const destColumnNumber = id.match(/\d+/)[0];
     const generatedId = `column-${destColumnNumber}`;
     setDroppableId(generatedId);
@@ -95,8 +94,9 @@ const Column = ({ id, title, tasks }) => {
         task: {
           taskNumber: newTaskNumber,
           topic: "",
-          severity: "Critical",
+          severity: "",
           target: "",
+          status: "",
           creationTime: creationTime,
         },
       })
@@ -127,7 +127,7 @@ const Column = ({ id, title, tasks }) => {
 
   const handleBlur = () => {
     setIsEditing(false);
-    updateTitle(editTitle); // Function to update the topic in the global state or parent component
+    updateTitle(editTitle);
   };
 
   const handleChange = (event) => {

@@ -6,14 +6,15 @@ import { CgSmartphone } from "react-icons/cg";
 import { LuMonitorSpeaker } from "react-icons/lu";
 import { LuMonitor } from "react-icons/lu";
 import { useDispatch } from "react-redux";
-import { updateTaskTopic } from "../redux/slices/columnsSlice";
+import { updateTaskTopic, selectTask } from "../redux/slices/columnsSlice";
 import Spinner from "./Spinner";
+import { useSelector } from "react-redux";
 
 // Styled components definitions...
 
 const Card = styled.div`
   background-color: #fff;
-  border: 1.5px solid #ccc;
+  border: 1.5px solid ${({ isSelected }) => (isSelected ? "#007BFF" : "#ccc")};
   border-radius: 10px;
   padding: 12px;
   margin-bottom: 10px;
@@ -28,7 +29,7 @@ const Diamond = styled.span`
   background-color: black;
   display: flex;
   justify-content: center;
-  align-items: center;;
+  align-items: center;
 `;
 
 const TaskInfo = styled.div`
@@ -42,7 +43,7 @@ const TaskInfo = styled.div`
 const TaskTopic = styled.h3`
   font-weight: 600;
   font-size: 15px;
-  overflow-wrap: break-word;  // Ensures words break to prevent overflow: ;
+  overflow-wrap: break-word;
   cursor: pointer;
 `;
 
@@ -79,14 +80,14 @@ const TargetTag = styled.span`
   max-width: 95px;
 
   svg {
-    flex-shrink: 0; // Prevent icon from shrinking
+    flex-shrink: 0;
     margin-right: 2px;
   }
   .text-container {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    flex-grow: 1; // Allow text container to fill available space
+    flex-grow: 1;
   }
 `;
 
@@ -97,26 +98,25 @@ const TickMark = styled.div`
   cursor: pointer;
 `;
 
-// Helper function to parse the tag text
 const parseTag = (tag) => {
   const splitTag = tag.split(":");
   return splitTag.length > 1 ? splitTag[1].trim() : splitTag[0].trim();
 };
 
 const getSeverityDetails = (severity) => {
-  if (!severity) return { color: "#eee", shadow: "rgba(0,0,0,0.2)" }; // Default gray
+  if (!severity) return { color: "#eee", shadow: "rgba(0,0,0,0.2)" };
 
   switch (severity.toLowerCase()) {
     case "critical":
-      return { color: "#b42727", shadow: "rgba(140, 37, 37, 0.4)" }; // Dark red
+      return { color: "#b42727", shadow: "rgba(140, 37, 37, 0.4)" };
     case "high":
-      return { color: "#e74135", shadow: "rgba(186, 49, 40, 0.4)" }; // Red
+      return { color: "#e74135", shadow: "rgba(186, 49, 40, 0.4)" };
     case "medium":
-      return { color: "#de7b25", shadow: "rgba(176, 91, 27, 0.4)" }; // Orange
+      return { color: "#de7b25", shadow: "rgba(176, 91, 27, 0.4)" };
     case "low":
-      return { color: "#e7a712", shadow: "rgba(174, 147, 15, 0.4)" }; // Yellow
+      return { color: "#e7a712", shadow: "rgba(174, 147, 15, 0.4)" };
     default:
-      return { color: "#eee", shadow: "rgba(0,0,0,0.2)" }; // Default gray
+      return { color: "#eee", shadow: "rgba(0,0,0,0.2)" };
   }
 };
 
@@ -133,15 +133,15 @@ const getTargetDetails = (target) => {
         bgcolor: "#ebf2ff",
         color: "#1f5db0",
         shadow: "rgba(227, 229, 237, 0.4)",
-      }; // Blue with globe symbol
+      };
     case "Source Code":
       return {
         bgcolor: "#faf0e2",
         color: "#d5902e",
         shadow: "rgba(228, 223, 218, 0.4)",
-      }; // Yellow with computer symbol
+      };
     default:
-      return { bgcolor: "#ccc" }; // Default grey with tag symbol
+      return { bgcolor: "#ccc" };
   }
 };
 
@@ -154,29 +154,26 @@ const getIconComponent = (target) => {
     case "Source Code":
       return <LuMonitor />;
     default:
-      return ""; // Default icon
+      return "";
   }
 };
 
 const TopicInput = styled.textarea`
   width: 100%;
   border: none;
-  resize: none; // Prevents resizing the textarea
+  resize: none;
   background: none;
   outline: none;
   font-size: 16px;
-  overflow: hidden; // Ensures the textarea does not overflow its container
-  max-height: 20px; // Minimum height to accommodate single-line input
+  overflow: hidden;
+  max-height: 20px;
   font-weight: 600;
 `;
 
-
-const TaskCard = ({ columnId, taskNumber, topic, severity, target, creationTime, provided, snapshot }) => {
+const TaskCard = ({ columnId, taskNumber, topic, severity, target, status, creationTime, provided, snapshot }) => {
   const [tickClicked, setTickClicked] = useState(false);
-
   const [isEditing, setIsEditing] = useState(false);
   const [editTopic, setEditTopic] = useState(topic);
-  
   const dispatch = useDispatch();
 
   const handleFocus = (event) => {
@@ -186,7 +183,7 @@ const TaskCard = ({ columnId, taskNumber, topic, severity, target, creationTime,
 
   const handleBlur = () => {
     setIsEditing(false);
-    updateTopic(editTopic); // Function to update the topic in the global state or parent component
+    updateTopic(editTopic);
   };
 
   const handleChange = (event) => {
@@ -196,8 +193,18 @@ const TaskCard = ({ columnId, taskNumber, topic, severity, target, creationTime,
   const updateTopic = (newTopic) => {
     dispatch(updateTaskTopic({ columnId, taskId: taskNumber, topic: newTopic }));
   };
+
+  const handleCardClick = () => {
+    dispatch(selectTask({ columnId, taskNumber: taskNumber}));
+  };
+
+  const selectedTask = useSelector((state) => state.columns.selectedTask);
+  let isSelected;
+  if(selectedTask){
+    isSelected = selectedTask.columnId === columnId && selectedTask.taskNumber === taskNumber;
+  }
   return (
-    <Card>
+    <Card isSelected={isSelected} onClick={handleCardClick}>
       <TaskInfo>
         <p>
           #{taskNumber} <span>•</span> {creationTime}
@@ -218,7 +225,6 @@ const TaskCard = ({ columnId, taskNumber, topic, severity, target, creationTime,
           {editTopic || "Click to add a topic..."}
         </TaskTopic>
       )}
-      {/* <TaskTopic>{topic}</TaskTopic> */}
       <div
         style={{
           display: "flex",
@@ -228,12 +234,16 @@ const TaskCard = ({ columnId, taskNumber, topic, severity, target, creationTime,
         }}
       >
         <Tags>
-          {severity !== ""?<SeverityTag severity={severity}>{severity}</SeverityTag>: ""}
-          {target !== ""?<TargetTag target={target}>
-            {getIconComponent(target)}
-            <span className="text-container">{target}</span>
-          </TargetTag>:""}
-          <Spinner value={6.5} />
+          {severity !== "" ? <SeverityTag severity={severity}>{severity}</SeverityTag> : ""}
+          {target !== "" ? (
+            <TargetTag target={target}>
+              {getIconComponent(target)}
+              <span className="text-container">{target}</span>
+            </TargetTag>
+          ) : (
+            ""
+          )}
+          {status !== "" ? <Spinner value={Number(status)} /> : ""}
         </Tags>
         <RiVerifiedBadgeFill
           size={20}
@@ -241,8 +251,7 @@ const TaskCard = ({ columnId, taskNumber, topic, severity, target, creationTime,
           onClick={() => setTickClicked(!tickClicked)}
           style={{
             cursor: "pointer",
-            backgroundColor: `${(props) =>
-              props.clicked ? "#007BFF" : "#ccc"}`,
+            backgroundColor: `${(props) => (props.clicked ? "#007BFF" : "#ccc")}`,
           }}
         />
       </div>
