@@ -1,3 +1,22 @@
+# Kanban Board App
+
+This is a Kanban board web application built using React and Redux. It allows users to manage tasks across different columns.
+
+## Features
+
+- Create, edit, and delete tasks
+- Drag and drop tasks between columns
+- Filter tasks by search query
+- Sort tasks by severity, target, or status
+- Responsive design for various screen sizes
+
+## Technologies Used
+
+- React
+- Redux
+- React Beautiful DND (Drag and Drop)
+- Styled Components
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
