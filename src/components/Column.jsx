@@ -12,6 +12,7 @@ import styled from "styled-components";
 import { FaCircle } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import { Droppable, Draggable } from "react-beautiful-dnd";
+import getCurrentTimeFormatted from "../utils/GetCurrentTimeFormatted";
 
 const ColumnHeader = styled.h2`
   color: #333;
@@ -48,6 +49,21 @@ const DropdownMenu = styled.div`
       background-color: #f0f0f0;
     }
   }
+`;
+
+const SubDropdown = styled.div`
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  top: 0;
+  left: ${({ alignRight }) => (alignRight ? "100%" : "auto")};
+  right: ${({ alignRight }) => (alignRight ? "auto" : "100%")};
+  z-index: 1000;
+  width: 130px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 5px;
 `;
 
 const Root = styled.section`
@@ -104,8 +120,19 @@ const Column = ({ id, title, tasks }) => {
   };
 
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showSeverityDropdown, setShowSeverityDropdown] = useState(false);
+  const [showTargetDropdown, setShowTargetDropdown] = useState(false);
+  const [filterSeverity, setFilterSeverity] = useState("");
+  const [filterTarget, setFilterTarget] = useState("");
 
-  const toggleDropdown = () => setShowDropdown(!showDropdown);
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
+    setShowSeverityDropdown(false);
+    setShowTargetDropdown(false);
+  };
+  const toggleSeverityDropdown = () =>
+    setShowSeverityDropdown(!showSeverityDropdown);
+  const toggleTargetDropdown = () => setShowTargetDropdown(!showTargetDropdown);
 
   const handleDeleteTask = (taskId) => {
     dispatch(deleteTask({ columnId: id, taskId }));
@@ -138,17 +165,26 @@ const Column = ({ id, title, tasks }) => {
     dispatch(updateColumnTitle({ columnId: id, title: newTopic }));
   };
 
-  const getCurrentTimeFormatted = () => {
-    const now = new Date();
-    const options = {
-      day: "numeric",
-      month: "short",
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    };
-    return new Intl.DateTimeFormat("en-US", options).format(now);
+  const handleFilterBySeverity = (severity) => {
+    setShowSeverityDropdown(false);
+    setFilterSeverity(severity);
   };
+
+  const handleFilterByTarget = (target) => {
+    setShowTargetDropdown(false);
+    setFilterTarget(target);
+  };
+
+  const handleClearFilters = () => {
+    setFilterSeverity("");
+    setFilterTarget("");
+  };
+
+  const filteredTasks = tasks.filter((task) => {
+    if (filterSeverity && task.severity !== filterSeverity) return false;
+    if (filterTarget && task.target !== filterTarget) return false;
+    return true;
+  });
 
   return (
     <Root>
@@ -188,6 +224,45 @@ const Column = ({ id, title, tasks }) => {
               <button onClick={() => handleDeleteColumn(id)}>
                 Delete Category
               </button>
+              <button onClick={toggleSeverityDropdown}>
+                Filter by Severity
+              </button>
+              {showSeverityDropdown && (
+                <SubDropdown alignRight>
+                  <button onClick={() => handleFilterBySeverity("Critical")}>
+                    Critical
+                  </button>
+                  <button onClick={() => handleFilterBySeverity("High")}>
+                    High
+                  </button>
+                  <button onClick={() => handleFilterBySeverity("Medium")}>
+                    Medium
+                  </button>
+                  <button onClick={() => handleFilterBySeverity("Low")}>
+                    Low
+                  </button>
+                  <button onClick={handleClearFilters}>Clear</button>
+                </SubDropdown>
+              )}
+              <button
+                onClick={toggleTargetDropdown}
+              >
+                Filter by Target
+              </button>
+              {showTargetDropdown && (
+                <SubDropdown>
+                  <button onClick={() => handleFilterByTarget("Hypejab")}>
+                    Hypejab
+                  </button>
+                  <button onClick={() => handleFilterByTarget("Getastra")}>
+                    Getastra
+                  </button>
+                  <button onClick={() => handleFilterByTarget("Source Code")}>
+                    Source Code
+                  </button>
+                  <button onClick={handleClearFilters}>Clear</button>
+                </SubDropdown>
+              )}
               {tasks.map((task) => (
                 <button
                   key={task.taskNumber}
@@ -206,7 +281,7 @@ const Column = ({ id, title, tasks }) => {
       <Droppable droppableId={droppableId}>
         {(provided, snapshot) => (
           <div ref={provided.innerRef} {...provided.droppableProps}>
-            {tasks.map((task, index) => (
+            {filteredTasks.map((task, index) => (
               <Draggable
                 key={task.taskNumber.toString()}
                 draggableId={task.taskNumber.toString()}

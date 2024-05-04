@@ -10,8 +10,6 @@ import { updateTaskTopic, selectTask } from "../redux/slices/columnsSlice";
 import Spinner from "./Spinner";
 import { useSelector } from "react-redux";
 
-// Styled components definitions...
-
 const Card = styled.div`
   background-color: #fff;
   border: 1.5px solid ${({ isSelected }) => (isSelected ? "#007BFF" : "#ccc")};
@@ -170,7 +168,17 @@ const TopicInput = styled.textarea`
   font-weight: 600;
 `;
 
-const TaskCard = ({ columnId, taskNumber, topic, severity, target, status, creationTime, provided, snapshot }) => {
+const TaskCard = ({
+  columnId,
+  taskNumber,
+  topic,
+  severity,
+  target,
+  status,
+  creationTime,
+  provided,
+  snapshot,
+}) => {
   const [tickClicked, setTickClicked] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTopic, setEditTopic] = useState(topic);
@@ -191,17 +199,25 @@ const TaskCard = ({ columnId, taskNumber, topic, severity, target, status, creat
   };
 
   const updateTopic = (newTopic) => {
-    dispatch(updateTaskTopic({ columnId, taskId: taskNumber, topic: newTopic }));
+    dispatch(
+      updateTaskTopic({ columnId, taskNumber: taskNumber, topic: newTopic })
+    );
   };
 
   const handleCardClick = () => {
-    dispatch(selectTask({ columnId, taskNumber: taskNumber}));
+    dispatch(selectTask({ columnId, taskNumber: taskNumber }));
+  };
+
+  const handleBadgeClick = () => {
+    setTickClicked(!tickClicked);
   };
 
   const selectedTask = useSelector((state) => state.columns.selectedTask);
   let isSelected;
-  if(selectedTask){
-    isSelected = selectedTask.columnId === columnId && selectedTask.taskNumber === taskNumber;
+  if (selectedTask) {
+    isSelected =
+      selectedTask.columnId === columnId &&
+      selectedTask.taskNumber === taskNumber;
   }
   return (
     <Card isSelected={isSelected} onClick={handleCardClick}>
@@ -234,7 +250,11 @@ const TaskCard = ({ columnId, taskNumber, topic, severity, target, status, creat
         }}
       >
         <Tags>
-          {severity !== "" ? <SeverityTag severity={severity}>{severity}</SeverityTag> : ""}
+          {severity !== "" ? (
+            <SeverityTag severity={severity}>{severity}</SeverityTag>
+          ) : (
+            ""
+          )}
           {target !== "" ? (
             <TargetTag target={target}>
               {getIconComponent(target)}
@@ -247,11 +267,11 @@ const TaskCard = ({ columnId, taskNumber, topic, severity, target, status, creat
         </Tags>
         <RiVerifiedBadgeFill
           size={20}
-          clicked={tickClicked}
-          onClick={() => setTickClicked(!tickClicked)}
+          onClick={handleBadgeClick}
+          color={tickClicked ? "#007BFF" : "#ccc"}
           style={{
             cursor: "pointer",
-            backgroundColor: `${(props) => (props.clicked ? "#007BFF" : "#ccc")}`,
+            backgroundColor: "#fff"
           }}
         />
       </div>

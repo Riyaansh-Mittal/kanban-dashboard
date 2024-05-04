@@ -10,7 +10,7 @@ import {
   updateTaskSeverity,
   updateTaskStatus,
   updateTaskTarget,
-  updateColumnTasks
+  updateColumnTasks,
 } from "../redux/slices/columnsSlice";
 
 const ControlsContainer = styled.div`
@@ -69,7 +69,6 @@ const SearchInput = styled.div`
   }
 `;
 
-
 const Input = styled.input`
   border: none;
   outline: none;
@@ -82,7 +81,6 @@ const MagnifyingGlassIcon = styled.span`
   margin-left: 10px;
   margin-right: 5px;
 `;
-
 
 const LabelWrapper = styled.div`
   display: flex;
@@ -105,7 +103,7 @@ const targetOptions = [
   { value: "", label: "Remove Target" },
 ];
 
-function Controls() {
+function Controls({ onSearchChange }) {
   const dispatch = useDispatch();
 
   const handleAddColumn = () => {
@@ -186,91 +184,91 @@ function Controls() {
       });
       return { ...column, tasks: sortedTasks };
     });
-    console.log(sortedColumns);
+
     sortedColumns.forEach((column) => {
       dispatch(updateColumnTasks({ columnId: column.id, tasks: column.tasks }));
     });
   };
-  
 
   return (
     <ControlsContainer>
-                <SearchInput>
-            <MagnifyingGlassIcon>
-              <HiMiniMagnifyingGlass size={15} />
-            </MagnifyingGlassIcon>
+      <SearchInput>
+        <MagnifyingGlassIcon>
+          <HiMiniMagnifyingGlass size={15} />
+        </MagnifyingGlassIcon>
+        <Input
+          type="search"
+          placeholder="Search by issue name..."
+          style={{ marginBottom: "2px", borderRadius: "10px", color: "" }}
+          onChange={onSearchChange}
+        />
+      </SearchInput>
+      <SortButton onClick={sortTasksByDate}>
+        <TbArrowsSort style={{ transform: "scaleX(-1)" }} />
+        Sort by
+      </SortButton>
+      <Button onClick={handleAddColumn}>
+        <FiPlusCircle />
+        Assigned To
+      </Button>
+      <LabelWrapper>
+        <Button onClick={handleSeverityButtonClick}>
+          <FiPlusCircle />
+          Severity
+        </Button>
+        {selectedTask && isSeverityDropdownOpen && (
+          <Dropdown
+            value={selectedSeverity}
+            onChange={(e) => handleLabelChange(e, "severity")}
+          >
+            {severityOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Dropdown>
+        )}
+      </LabelWrapper>
+      <LabelWrapper>
+        <Button onClick={handleStatusButtonClick}>
+          <FiPlusCircle />
+          Status
+        </Button>
+        {selectedTask && isStatusInputOpen && (
+          <div style={{ display: "flex", alignItems: "center" }}>
             <Input
-              type="search"
-              placeholder="Search by issue name..."
-              style={{ marginBottom: "2px", borderRadius: "10px", color: "" }}
+              type="text"
+              placeholder="Enter status..."
+              value={statusValue}
+              onChange={handleStatusChange}
             />
-          </SearchInput>
-          <SortButton onClick={sortTasksByDate}>
-            <TbArrowsSort style={{ transform: "scaleX(-1)" }} />
-            Sort by
-          </SortButton>
-          <Button onClick={handleAddColumn}>
-            <FiPlusCircle />
-            Assigned To
-          </Button>
-          <LabelWrapper>
-            <Button onClick={handleSeverityButtonClick}>
-              <FiPlusCircle />
-              Severity
-            </Button>
-            {selectedTask && isSeverityDropdownOpen && (
-              <Dropdown
-                value={selectedSeverity}
-                onChange={(e) => handleLabelChange(e, "severity")}
-              >
-                {severityOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Dropdown>
-            )}
-          </LabelWrapper>
-          <LabelWrapper>
-            <Button onClick={handleStatusButtonClick}>
-              <FiPlusCircle />
-              Status
-            </Button>
-            {selectedTask && isStatusInputOpen && (
-              <div style={{display: 'flex', alignItems: 'center'}}>
-                <Input
-                  type="text"
-                  placeholder="Enter status..."
-                  value={statusValue}
-                  onChange={handleStatusChange}
-                />
-                <Button onClick={handleStatusSubmit}>Save</Button>
-              </div>
-            )}
-          </LabelWrapper>
+            <Button onClick={handleStatusSubmit}>Save</Button>
+          </div>
+        )}
+      </LabelWrapper>
 
-          <Button>
-            <FiPlusCircle />
-            Pentest
-          </Button>
-          <LabelWrapper>
-            <Button onClick={handleTargetButtonClick}>
-              <FiPlusCircle />
-              Target
-            </Button>
-            {selectedTask && isTargetDropdownOpen && (
-              <Dropdown
-                value={selectedTarget}
-                onChange={(e) => handleLabelChange(e, "target")}
-              >
-                {targetOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Dropdown>
-            )}
-          </LabelWrapper>
+      <Button>
+        <FiPlusCircle />
+        Pentest
+      </Button>
+      <LabelWrapper>
+        <Button onClick={handleTargetButtonClick}>
+          <FiPlusCircle />
+          Target
+        </Button>
+        {selectedTask && isTargetDropdownOpen && (
+          <Dropdown
+            value={selectedTarget}
+            onChange={(e) => handleLabelChange(e, "target")}
+          >
+            {targetOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </Dropdown>
+        )}
+      </LabelWrapper>
     </ControlsContainer>
   );
 }

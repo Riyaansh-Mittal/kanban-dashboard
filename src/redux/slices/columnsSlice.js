@@ -87,9 +87,9 @@ export const columnsSlice = createSlice({
       }
     },
     updateTaskTopic: (state, action) => {
-      const { columnId, taskId, topic } = action.payload;
+      const { columnId, taskNumber, topic } = action.payload;
       const column = state.columns.find((c) => c.id === columnId);
-      const task = column?.tasks.find((t) => t.id === taskId);
+      const task = column?.tasks.find((t) => t.taskNumber === taskNumber);
       if (task) {
         task.topic = topic;
       }

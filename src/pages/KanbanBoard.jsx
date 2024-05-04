@@ -1,14 +1,15 @@
 import styled from "styled-components";
 import Column from "../components/Column";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  updateTaskLocation
-} from "../redux/slices/columnsSlice";
+import { updateTaskLocation } from "../redux/slices/columnsSlice";
 import { DragDropContext } from "react-beautiful-dnd";
 import { logout } from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import Switch from "../components/Switch";
 import Controls from "../components/Controls";
+import { useDebounce } from "../utils/useDebounce";
+import { useState } from "react";
+import filterTasksBySearch from "../utils/FilterTasksBySearch";
 
 const Root = styled.div`
   display: flex;
@@ -61,7 +62,6 @@ const ControlsContainer = styled.section`
   margin-bottom: 20px;
 `;
 
-
 const Button = styled.button`
   border: 1.5px dashed #ccc;
   background-color: #fff;
@@ -89,7 +89,6 @@ const SignOutButton = styled(Button)`
   border: 1.5px solid black;
 `;
 
-
 function KanbanBoard() {
   const columns = useSelector((state) => state.columns.columns);
   const dispatch = useDispatch();
@@ -116,6 +115,18 @@ function KanbanBoard() {
     );
   };
 
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+const searchedTasks = columns.map((column) => ({
+  ...column,
+  tasks: filterTasksBySearch(column.tasks, debouncedSearchQuery),
+}));
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
 
   const navigate = useNavigate();
 
@@ -130,90 +141,12 @@ function KanbanBoard() {
         <SignOutButton onClick={handleSignOut}>Sign Out</SignOutButton>
       </Header>
       <ControlsContainer>
-        {/* <ControlsContainer>
-          <SearchInput>
-            <MagnifyingGlassIcon>
-              <HiMiniMagnifyingGlass size={15} />
-            </MagnifyingGlassIcon>
-            <Input
-              type="search"
-              placeholder="Search by issue name..."
-              style={{ marginBottom: "2px", borderRadius: "10px", color: "" }}
-            />
-          </SearchInput>
-          <SortButton>
-            <TbArrowsSort style={{ transform: "scaleX(-1)" }} />
-            Sort by
-          </SortButton>
-          <Button onClick={handleAddColumn}>
-            <FiPlusCircle />
-            Assigned To
-          </Button>
-          <LabelWrapper>
-            <Button onClick={handleSeverityButtonClick}>
-              <FiPlusCircle />
-              Severity
-            </Button>
-            {selectedTask && isSeverityDropdownOpen && (
-              <Dropdown
-                value={selectedSeverity}
-                onChange={(e) => handleLabelChange(e, "severity")}
-              >
-                {severityOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Dropdown>
-            )}
-          </LabelWrapper>
-          <LabelWrapper>
-            <Button onClick={handleStatusButtonClick}>
-              <FiPlusCircle />
-              Status
-            </Button>
-            {selectedTask && isStatusInputOpen && (
-              <div>
-                <Input
-                  type="text"
-                  placeholder="Enter status..."
-                  value={statusValue}
-                  onChange={handleStatusChange}
-                />
-                <Button onClick={handleStatusSubmit}>Save</Button>
-              </div>
-            )}
-          </LabelWrapper>
-
-          <Button>
-            <FiPlusCircle />
-            Pentest
-          </Button>
-          <LabelWrapper>
-            <Button onClick={handleTargetButtonClick}>
-              <FiPlusCircle />
-              Target
-            </Button>
-            {selectedTask && isTargetDropdownOpen && (
-              <Dropdown
-                value={selectedTarget}
-                onChange={(e) => handleLabelChange(e, "target")}
-              >
-                {targetOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Dropdown>
-            )}
-          </LabelWrapper>
-        </ControlsContainer> */}
-        <Controls />
+        <Controls onSearchChange={handleSearchChange} />
         <Switch />
       </ControlsContainer>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Board>
-          {columns.map((column, index) => (
+          {searchedTasks.map((column, index) => (
             <Column key={column.id} {...column} index={index} />
           ))}
         </Board>
